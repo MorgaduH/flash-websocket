@@ -1,26 +1,35 @@
-
+const http = require("http");
 const WebSocket = require("ws");
 
-const PORT = process.env.PORT || 8080;
-const wss = new WebSocket.Server({ port: PORT });
+// Usa a porta definida pelo Render ou 3000 localmente
+const PORT = process.env.PORT || 3000;
 
-let clients = [];
+// Cria o servidor HTTP base
+const server = http.createServer();
+
+// Cria o servidor WebSocket atrelado ao HTTP
+const wss = new WebSocket.Server({ server });
 
 wss.on("connection", function connection(ws) {
-  clients.push(ws);
+  console.log("Novo cliente conectado");
 
-  ws.on("message", function incoming(message) {
-    // Envia a mensagem recebida para todos os outros clientes
-    for (const client of clients) {
+  ws.on("message", function incoming(data) {
+    console.log("Mensagem recebida:", data);
+
+    // Reenvia para todos os clientes conectados
+    wss.clients.forEach(function each(client) {
       if (client.readyState === WebSocket.OPEN) {
-        client.send(message);
+        client.send(data);
       }
-    }
+    });
   });
 
-  ws.on("close", () => {
-    clients = clients.filter(client => client !== ws);
+  ws.on("close", function () {
+    console.log("Cliente desconectado");
   });
 });
 
-console.log("Servidor WebSocket rodando na porta " + PORT);
+// Inicia o servidor
+server.listen(PORT, () => {
+  console.log(`Servidor WebSocket ativo na porta ${PORT}`);
+});
