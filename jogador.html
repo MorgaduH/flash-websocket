@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Desafio Visual</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      background-color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      transition: background-color 0.2s ease;
+    }
+    #message {
+      font-size: 2rem;
+      color: black;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+  </style>
+</head>
+<body>
+  <div id="message"></div>
+  <script>
+    const ws = new WebSocket("wss://SEU_SERVIDOR_WEBSOCKET_AQUI");
+    const msgDiv = document.getElementById("message");
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        document.body.style.backgroundColor = data.color || "yellow";
+        msgDiv.textContent = data.message || "";
+        msgDiv.style.opacity = 1;
+
+        setTimeout(() => {
+          document.body.style.backgroundColor = "white";
+          msgDiv.style.opacity = 0;
+        }, 500); // 0.5 segundos
+      } catch (e) {
+        console.error("Erro ao interpretar a mensagem:", e);
+      }
+    };
+  </script>
+</body>
+</html>
